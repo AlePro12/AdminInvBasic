@@ -1,13 +1,51 @@
 <?php
 require_once "Layout.php";
+require_once "Core.php";
+$Core = new Core();
 
+//Generate db if no exist
+$Core->Databasesd();
 $layout = new Layout();
-
+//phpinfo();
 $layout->headers();
+if (@isset($_POST['CODP'])==True){
+
+
+    $GET = array_keys($_GET)[0];
+    echo $GET;
+
+
+
+    $CODP = $_POST['CODP'];
+    $DESCRIP = $_POST['DESCRIP'];
+    $UTIL = $_POST['UTIL'];
+    $PF1 = $_POST['PF1'];
+    $EX = $_POST['EX'];
+    $COSTO = $_POST['COSTO'];
+
+    if ($GET == "Update"){
+
+        $sentencia = $Core->DB()->prepare("update INV set DESCRIP = '$DESCRIP', PRECIOF1 = '$PF1', COSTO ='$COSTO',UTIL='$UTIL',EXIST= '$EX'  where CODP = '$CODP';");
+} else{
+    $sentencia = $Core->DB()->prepare("INSERT INTO inv(id,CODP, DESCRIP, PRECIOF1,COSTO,UTIL,EXIST)
+	VALUES(null,'$CODP', '$DESCRIP', '$PF1','$COSTO','$UTIL','$EX');");
+    /*
+     	CODP TEXT NOT NULL,
+	DESCRIP TEXT NOT NULL,
+	PRECIOF1 TEXT NOT NULL,
+	PRECIO1 TEXT NOT NULL,
+	UTIL TEXT NOT NULL,
+	EXIST TEXT NOT NULL,
+     */
+    }    $resultado = $sentencia->execute();
+
+  //  header('location: index.php');
+}
+
+//
 ?>
-
-
-<nav class="nav-extended indigo">
+    REVISAR EL VIDEO DE GABRIEL A LAS 2
+    <nav class="nav-extended indigo">
     <div class="nav-wrapper">
         <a href="#" class="brand-logo">DetcSoft InvBasic</a>
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
@@ -38,15 +76,25 @@ $layout->headers();
 
 <!-- editor -->
 <div id="test2" class="col s12 container">
+    <div class="card-panel ">
+        <h4>Modificar producto</h4>
+        <button id="AP">Abrir buscador</button>
+        <script>
 
+        </script>
+        <?php
+        $layout->ProdSearch("AP");
+
+        ?>
+    </div>
 
     <div class="card-panel ">
-        <h4>Crear producto</h4>
+        <h4 id="LabelProd">Crear producto</h4>
         <div class="row">
-            <form action="actions.php" id="Fo" method="POST">
+            <form action="index.php" id="Fo" method="POST">
                 <div class="input-field col s6">
-                    <input  id="first_name" type="text" name="CODP" class="validate">
-                    <label for="first_name">Codigo</label>
+                    <input   type="text" id="CODP" name="CODP" class="validate">
+                    <label for="CODP">Codigo</label>
                 </div>
                 <div class="input-field col s6">
                     <input  id="DESCRIP" type="text" name="DESCRIP" class="validate">
@@ -64,8 +112,26 @@ $layout->headers();
                     <input  id="PF1" type="text" name="PF1" class="validate">
                     <label for="PF1">Precio final</label>
                 </div>
+                <div class="input-field col s5">
+                    <input  id="EX" type="text" name="EX" class="validate">
+                    <label for="EX">Existencia</label>
+                </div>
             </form>
             <script>
+                function MOD(DESCRIP,CODP,PRECIOF1,UTIL,COSTO,EXIST){
+
+                    $('#LabelProd').html("Modificar");
+                    $('#UTIL').val(UTIL);
+                    $('#DESCRIP').val(DESCRIP);
+                    $('#CODP').val(CODP);
+                    $( "#CODP" ).prop( "disabled", true );
+                    $('#PF1').val(PRECIOF1);
+                    $('#COSTO').val(COSTO);
+                    $('#EX').val(EXIST);
+                    $('#Fo').attr("action","index.php?Update");
+                    $( "#dialog" ).dialog('close');
+                    M.updateTextFields();
+                }
                 function RefreshCampos_Costo(e){
                      UtilNew = 0;
                      CostoNew = 0;
@@ -120,7 +186,7 @@ $layout->headers();
                         Preciof = parseFloat(accounting.unformat( Preciof));
                     }
 
-                    PreciofNew =(parseFloat(Costo) * parseFloat(Util) / 100);
+                    PreciofNew = parseFloat(Costo) + (parseFloat(Costo) * parseFloat(Util) / 100);
 
 
 
@@ -143,21 +209,14 @@ $layout->headers();
 
 
 
-                function RefreshCampos_Costo(){
-                     UtilNew = 0;
-                     CostoNew = 0;
-                     PreciofNew = 0;
-                      Preciof = $('#COSTO').val();
-                      Costo = $('#UTIL').val();
-                     Util =  $('#PF1').val();
-
-                    PreciofNew = Costo + (Costo / Util * 100);
 
 
-                    //$('#COSTO').val(CostoNew);
-                    //$('#UTIL').val(UtilNew);
-                    $('#PF1').val(PreciofNew);
-                }
+
+
+
+
+
+
             </script>
             <a onclick="$('#Fo').submit()" class="waves-effect  btn light-blue darken-4">Guardar</a>
 
